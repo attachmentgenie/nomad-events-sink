@@ -6,10 +6,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/knadh/koanf"
+	lokiflag "github.com/grafana/loki/pkg/util/flagext"
 	"github.com/knadh/koanf/parsers/toml"
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
+	"github.com/knadh/koanf/v2"
 	sink "github.com/mr-karan/nomad-events-sink/internal/sinks"
 	"github.com/mr-karan/nomad-events-sink/internal/sinks/provider"
 	"github.com/mr-karan/nomad-events-sink/pkg/stream"
@@ -76,15 +77,23 @@ func initConfig(cfgDefault string, envPrefix string) (*koanf.Koanf, error) {
 
 func initSink(ko *koanf.Koanf, log *logrus.Logger) sink.Sink {
 	// Initialise HTTP Provider.
+	labelSet := lokiflag.LabelSet{}
+	externalLabels := ko.String("sinks.http.external_labels")
+	if externalLabels != "" {
+		errS := labelSet.Set(externalLabels)
+		if errS != nil {
+			log.WithError(errS).Fatal("error initialising http sink provider external_labels")
+		}
+	}
+
 	http, err := provider.NewHTTP(
 		provider.HTTPOpts{
-			Log:                log,
-			RootURL:            ko.String("sinks.http.root_url"),
-			Timeout:            ko.Duration("sinks.http.timeout"),
-			MaxConnections:     ko.Int("sinks.http.max_idle_conns"),
-			HealthCheckEnabled: ko.Bool("sinks.http.healthcheck.enabled"),
-			HealthcheckURL:     ko.String("sinks.http.healthcheck.url"),
-			HealthCheckStatus:  ko.Int("sinks.http.healthcheck.status"),
+			ExternalLabels: labelSet,
+			Log:            log,
+			Password:       ko.String("sinks.http.password"),
+			RootURL:        ko.String("sinks.http.root_url"),
+			Timeout:        ko.Duration("sinks.http.timeout"),
+			Username:       ko.String("sinks.http.username"),
 		})
 	if err != nil {
 		log.WithError(err).Fatal("error initialising http sink provider")
@@ -104,11 +113,16 @@ func initSink(ko *koanf.Koanf, log *logrus.Logger) sink.Sink {
 }
 
 func initStream(ctx context.Context, ko *koanf.Koanf, log *logrus.Logger, cb stream.CallbackFunc) *stream.Stream {
+	streamVerbose := false
+	if ko.String("app.log") == "debug" {
+		streamVerbose = true
+	}
+
 	s, err := stream.New(
 		ko.String("app.data_dir"),
 		ko.Duration("app.commit_index_interval"),
 		cb,
-		true,
+		streamVerbose,
 	)
 	if err != nil {
 		log.WithError(err).Fatal("error initialising stream")

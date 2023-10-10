@@ -10,7 +10,7 @@ Events can help debug the cluster state and alert operators about new deployment
 
 The missing piece was a tool to ingest these events and analyze/visualize them later. This is where `nomad-events-sink` agent comes into picture and helps to ingest these events in multiple configurable **Sinks**.
 
-The tool is designed to be generic in order to handle many use-cases of processing events. Multiple [Sink Providers](./internal/sinks/provider/provider.go) can be created and events will be handled by them. Common usecases included storing events for long term use (Vector->Loki), alerting on cluster state changes (Slack/Rocketchat webhooks) etc.
+The tool is designed to be generic in order to handle many use-cases of processing events. Multiple [Sink Providers](./internal/sinks/provider/provider.go) can be created and events will be handled by them. Common usecases included storing events for long term use (Loki), alerting on cluster state changes (Slack/Rocketchat webhooks) etc.
 
 ## How does it work?
 
@@ -42,7 +42,7 @@ Grab the latest release from [Releases](https://github.com/mr-karan/nomad-events
 To run:
 
 ```
-$ ./nomad-events-sink.bin --config config.toml
+$ ./nomad-events-sink --config config.toml
 ```
 
 ### Docker
@@ -53,7 +53,7 @@ docker pull ghcr.io/mr-karan/nomad-events-sink:latest
 
 ### Quick Start
 
-Refer to [this example](./examples/README.md) for quickly getting started with ingesting Deployment Events to Loki using Vector.
+Refer to [this example](./examples/README.md) for quickly getting started with ingesting Deployment Events to Loki.
 
 ![](./docs/loki.png)
 
@@ -85,7 +85,7 @@ You can read about them in detail [here](https://www.nomadproject.io/docs/runtim
 
 ## Sink Providers
 
-- Currently only **HTTP** Provider is implemented. There's a full [working example](./examples/README.md) of ingesting events to the HTTP server provided by Vector and dumping them to Loki.
+- Currently only **HTTP** Provider is implemented. There's a full [working example](./examples/README.md) of ingesting events and dumping them to Loki.
 
 ## Contribution
 

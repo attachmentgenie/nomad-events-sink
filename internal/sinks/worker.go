@@ -2,7 +2,6 @@ package sink
 
 import (
 	"context"
-	"encoding/json"
 	"time"
 
 	"github.com/hashicorp/nomad/api"
@@ -74,26 +73,21 @@ func (w *Worker) flush(batch []api.Event) {
 		return
 	}
 
-	data, err := prepareJSON(batch)
-	if err != nil {
-		w.log.WithField("batch_len", len(batch)).WithError(err).Error("error while json marshall")
-	}
-
 	w.log.WithField("batch_len", len(batch)).Info("pushing events to providers")
 	for _, prov := range w.providers {
-		err = prov.Push(data)
-		if err != nil {
-			// TODO: Handle the error better.
-			w.log.WithError(err).Error("error while pushing to provider")
-		}
+		prov.Push(batch)
+		//if err != nil {
+		//	// TODO: Handle the error better.
+		//	w.log.WithError(err).Error("error while pushing to provider")
+		//}
 	}
 }
 
 // prepareJSON takes batches of events and returns JSON encoding of the same.
-func prepareJSON(events []api.Event) ([]byte, error) {
-	data, err := json.Marshal(events)
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
-}
+//func prepareJSON(events []api.Event) ([]byte, error) {
+//	data, err := json.Marshal(events)
+//	if err != nil {
+//		return nil, err
+//	}
+//	return data, nil
+//}

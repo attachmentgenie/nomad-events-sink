@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,8 +13,9 @@ import (
 )
 
 var (
-	// Version of the build. This is injected at build-time.
-	buildString = "unknown"
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
 )
 
 func main() {
@@ -45,6 +47,6 @@ func main() {
 	}
 
 	// Start an instance of app.
-	app.log.WithField("version", buildString).Info("booting nomad events collector")
+	app.log.WithFields(logrus.Fields{"version": version, "commit": commit, "date": date}).Info("booting nomad events collector")
 	app.Start(ctx)
 }

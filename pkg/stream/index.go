@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"time"
 )
 
@@ -65,7 +65,7 @@ func (s *Stream) commitIndex(path string) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(path, jsonIndex, 0644)
+	err = os.WriteFile(path, jsonIndex, 0644)
 	if err != nil {
 		return err
 	}
@@ -77,7 +77,7 @@ func (s *Stream) commitIndex(path string) error {
 func (s *Stream) readIndex(path string) error {
 	s.log.debugf("reading index file: %s", path)
 
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}

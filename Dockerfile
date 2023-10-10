@@ -1,5 +1,4 @@
-FROM ubuntu:20.04
-WORKDIR /app
-COPY nomad-events-sink.bin .
+FROM scratch
+COPY nomad-events-sink .
 COPY config.sample.toml ./config.toml
-CMD ["./nomad-events-sink.bin"]
+CMD ["./nomad-events-sink"]

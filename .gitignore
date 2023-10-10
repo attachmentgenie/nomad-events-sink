@@ -17,6 +17,7 @@
 config.toml
 .env
 bin/
+.data/
 data/
 dist/
 .vscode/

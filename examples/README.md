@@ -6,7 +6,7 @@
 $ nomad agent -bind 0.0.0.0 -dev
 ```
 
-## Setup Loki/Grafana/Vector
+## Setup Loki/Grafana
 
 ```
 docker-compose up

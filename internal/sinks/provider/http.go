@@ -1,104 +1,91 @@
 package provider
 
 import (
-	"bytes"
-	"fmt"
-	"net/http"
+	"encoding/json"
+	"os"
 	"time"
 
+	"github.com/go-kit/log"
+	"github.com/grafana/dskit/backoff"
+	"github.com/grafana/dskit/flagext"
+	prom_api "github.com/grafana/loki/clients/pkg/promtail/api"
+	"github.com/grafana/loki/clients/pkg/promtail/client"
+	"github.com/grafana/loki/pkg/logproto"
+	lokiflag "github.com/grafana/loki/pkg/util/flagext"
+	nomad_api "github.com/hashicorp/nomad/api"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/common/config"
+	"github.com/prometheus/common/model"
 	"github.com/sirupsen/logrus"
 )
 
 // HTTPManager represents the various methods for interacting with Pigeon.
 type HTTPManager struct {
-	client  http.Client
+	client  client.Client
 	rootURL string
 	log     *logrus.Logger
 }
 
 type HTTPOpts struct {
+	ExternalLabels lokiflag.LabelSet
 	Log            *logrus.Logger
+	Password       string
 	RootURL        string
 	Timeout        time.Duration
-	MaxConnections int
-
-	HealthCheckEnabled bool
-	HealthcheckURL     string
-	HealthCheckStatus  int
+	Username       string
 }
 
 // NewHTTP initializes a HTTP notification dispatcher object.
 func NewHTTP(opts HTTPOpts) (*HTTPManager, error) {
-	if opts.RootURL == "" {
-		return nil, fmt.Errorf("sink HTTP provider misconfigured. Missing required value: `root_url`")
+	serverURL := flagext.URLValue{}
+	err := serverURL.Set(opts.RootURL)
+	if err != nil {
+		return nil, err
 	}
-	if opts.Timeout < time.Duration(1)*time.Second {
-		return nil, fmt.Errorf("sink HTTP provider misconfigured. `timeout` value is dangerously low: %s", opts.Timeout)
-	}
-	if opts.MaxConnections == 0 {
-		opts.MaxConnections = 100
+	cfg := client.Config{
+		URL:                    serverURL,
+		BatchWait:              100 * time.Millisecond,
+		BatchSize:              10,
+		DropRateLimitedBatches: true,
+		Client:                 config.HTTPClientConfig{BasicAuth: &config.BasicAuth{Username: opts.Username, Password: config.Secret(opts.Password)}},
+		BackoffConfig:          backoff.Config{MinBackoff: 1 * time.Millisecond, MaxBackoff: 2 * time.Millisecond, MaxRetries: 3},
+		ExternalLabels:         opts.ExternalLabels,
+		Timeout:                opts.Timeout,
+		TenantID:               "tenant-default",
 	}
 
-	// Initialise HTTP Client object.
-	client := http.Client{
-		Timeout: opts.Timeout,
-		Transport: &http.Transport{
-			MaxIdleConnsPerHost:   opts.MaxConnections,
-			ResponseHeaderTimeout: opts.Timeout,
-		},
+	reg := prometheus.NewRegistry()
+	m := client.NewMetrics(reg)
+	c, err := client.New(m, cfg, 0, 999999, false, log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr)))
+	if err != nil {
+		//fmt.Errorf("sink HTTP provider misconfigured")
+		return nil, err
 	}
 
 	httpMgr := &HTTPManager{
-		client:  client,
+		client:  c,
 		rootURL: opts.RootURL,
 		log:     opts.Log,
-	}
-
-	// Ping upstream if healthcheck is enabled.
-	if opts.HealthCheckEnabled {
-		httpMgr.log.WithField("url", opts.HealthcheckURL).Info("attempting to ping provider")
-		return httpMgr, httpMgr.Ping(opts.HealthcheckURL, opts.HealthCheckStatus)
 	}
 
 	return httpMgr, nil
 }
 
 // Push sends out events to an HTTP Endpoint.
-func (m *HTTPManager) Push(data []byte) error {
-	req, err := http.NewRequest("POST", m.rootURL, bytes.NewBuffer(data))
-	if err != nil {
-		m.log.WithError(err).Error("error preparing http request")
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
+func (m *HTTPManager) Push(events []nomad_api.Event) {
+	for _, event := range events {
+		labelSet := model.LabelSet{
+			"topic": model.LabelValue(event.Topic),
+			"type":  model.LabelValue(event.Type),
+		}
 
-	resp, err := m.client.Do(req)
-	if err != nil {
-		m.log.WithError(err).Error("error sending http request")
-		return err
+		event_info, _ := json.Marshal(event)
+		logEntry := prom_api.Entry{Labels: labelSet, Entry: logproto.Entry{Timestamp: time.Now(), Line: string(event_info)}}
+		m.client.Chan() <- logEntry
 	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("received non 200 OK from upstream: %s", resp.Status)
-	}
-
-	return nil
 }
 
 // Name returns the notification provider name.
 func (m *HTTPManager) Name() string {
 	return "http"
-}
-
-// Ping does a simple HTTP GET request to the
-func (m *HTTPManager) Ping(url string, status int) error {
-	resp, err := m.client.Get(url)
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode != status {
-		return fmt.Errorf("status mismatch; expected %d got %d - %s", status, resp.StatusCode, resp.Status)
-	}
-	return nil
 }
