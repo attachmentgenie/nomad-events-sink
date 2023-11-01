@@ -1,4 +1,4 @@
-module github.com/mr-karan/nomad-events-sink
+module github.com/attachmentgenie/nomad-events-sink
 
 go 1.21
 

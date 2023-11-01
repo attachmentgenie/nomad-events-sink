@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/attachmentgenie/nomad-events-sink/internal/sinks/provider"
 	"github.com/hashicorp/nomad/api"
-	"github.com/mr-karan/nomad-events-sink/internal/sinks/provider"
 	"github.com/sirupsen/logrus"
 )
 

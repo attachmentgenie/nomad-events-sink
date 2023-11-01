@@ -8,8 +8,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/attachmentgenie/nomad-events-sink/pkg/stream"
 	"github.com/hashicorp/nomad/api"
-	"github.com/mr-karan/nomad-events-sink/pkg/stream"
 )
 
 var (

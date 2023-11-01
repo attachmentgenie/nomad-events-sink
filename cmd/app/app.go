@@ -4,8 +4,8 @@ import (
 	"context"
 	"sync"
 
-	sink "github.com/mr-karan/nomad-events-sink/internal/sinks"
-	"github.com/mr-karan/nomad-events-sink/pkg/stream"
+	sink "github.com/attachmentgenie/nomad-events-sink/internal/sinks"
+	"github.com/attachmentgenie/nomad-events-sink/pkg/stream"
 	"github.com/sirupsen/logrus"
 )
 

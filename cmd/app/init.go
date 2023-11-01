@@ -6,14 +6,14 @@ import (
 	"os"
 	"strings"
 
+	sink "github.com/attachmentgenie/nomad-events-sink/internal/sinks"
+	"github.com/attachmentgenie/nomad-events-sink/internal/sinks/provider"
+	"github.com/attachmentgenie/nomad-events-sink/pkg/stream"
 	lokiflag "github.com/grafana/loki/pkg/util/flagext"
 	"github.com/knadh/koanf/parsers/toml"
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
-	sink "github.com/mr-karan/nomad-events-sink/internal/sinks"
-	"github.com/mr-karan/nomad-events-sink/internal/sinks/provider"
-	"github.com/mr-karan/nomad-events-sink/pkg/stream"
 	"github.com/sirupsen/logrus"
 	flag "github.com/spf13/pflag"
 )

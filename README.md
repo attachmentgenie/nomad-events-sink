@@ -37,7 +37,7 @@ To deploy on a Nomad cluster, you can refer to [this jobspec](./deploy/job.nomad
 
 ### Binary
 
-Grab the latest release from [Releases](https://github.com/mr-karan/nomad-events-sink/releases).
+Grab the latest release from [Releases](https://github.com/attachmentgenie/nomad-events-sink/releases).
 
 To run:
 
@@ -48,7 +48,7 @@ $ ./nomad-events-sink --config config.toml
 ### Docker
 
 ```
-docker pull ghcr.io/mr-karan/nomad-events-sink:latest
+docker pull ghcr.io/attachmentgenie/nomad-events-sink:latest
 ```
 
 ### Quick Start
