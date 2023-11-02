@@ -3,20 +3,14 @@ before:
     - go mod download
 archives:
   - id: darwin
-    env:
-      - CGO_ENABLED=0
     builds:
     - darwin
     format: zip
   - id: linux
-    env:
-      - CGO_ENABLED=0
     builds:
     - linux
     format: zip
   - id: windows
-    env:
-      - CGO_ENABLED=0
     builds:
       - windows
     format: zip
@@ -32,6 +26,8 @@ brews:
       token: "{{ .Env.TAP_GITHUB_TOKEN }}"
 builds:
   - id: darwin
+    env:
+      - CGO_ENABLED=0
     goos:
       - darwin
     goarch:
@@ -39,6 +35,8 @@ builds:
       - arm64
     main: ./cmd/app
   - id: linux
+    env:
+      - CGO_ENABLED=0
     goos:
       - linux
     goarch:
@@ -46,6 +44,8 @@ builds:
       - arm64
     main: ./cmd/app
   - id: windows
+    env:
+      - CGO_ENABLED=0
     goos:
       - windows
     goarch:
