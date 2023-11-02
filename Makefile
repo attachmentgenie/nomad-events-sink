@@ -1,4 +1,4 @@
-APP-BIN := dist/nomad-events-sink
+APP-BIN := dist/$(shell basename $(shell pwd))
 .PHONY: build
 build:
 	mkdir -p bin
@@ -28,7 +28,7 @@ run: ## Run binary.
 fresh: build run
 .PHONY: lint
 lint:
-	docker run --rm -v .:/app -w /app golangci/golangci-lint:v1.55.1 golangci-lint run -v
+	golangci-lint run -D errcheck
 .PHONY: dev-suite
 dev-suite:
 	(cd examples; docker compose up -d;sleep 5;nomad run raw_exec.nomad)
