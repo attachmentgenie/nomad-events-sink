@@ -31,4 +31,4 @@ lint:
 	golangci-lint run -D errcheck
 .PHONY: dev-suite
 dev-suite:
-	(cd examples; docker compose up -d;sleep 5;nomad run raw_exec.nomad)
+	(cd examples; docker compose up -d;sleep 5;NOMAD_ADDR=http://localhost:4646 nomad run raw_exec.nomad)
