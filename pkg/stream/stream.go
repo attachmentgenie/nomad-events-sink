@@ -83,7 +83,7 @@ func (s *Stream) Subscribe(ctx context.Context, topic string, maxReconnectAttemp
 			}
 			// Else try connecting to stream again.
 			attempt++
-			s.log.errorf("attempting to reconnect to stream on topic: %s, attempt: %d, remaining: %d", topic, attempt, maxReconnectAttempts)
+			s.log.errorf("attempting to reconnect to stream on topic: %s, attempt: %d, remaining: %d", topic, attempt, maxReconnectAttempts-attempt)
 			continue
 		}
 
