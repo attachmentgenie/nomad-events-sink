@@ -1,7 +1,6 @@
 APP-BIN := dist/$(shell basename $(shell pwd))
 .PHONY: build
 build:
-	mkdir -p bin
 	goreleaser build --id $(shell go env GOOS) --single-target --snapshot --clean -o ${APP-BIN}
 .PHONY: darwin
 darwin:
