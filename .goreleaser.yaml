@@ -86,6 +86,10 @@ docker_manifests:
     image_templates:
       - "ghcr.io/attachmentgenie/{{.ProjectName}}:{{ .Version }}-amd64"
       - "ghcr.io/attachmentgenie/{{.ProjectName}}:{{ .Version }}-arm64v8"
+  - name_template: "ghcr.io/attachmentgenie/{{.ProjectName}}:v{{ .Major }}"
+    image_templates:
+      - "ghcr.io/attachmentgenie/{{.ProjectName}}:{{ .Version }}-amd64"
+      - "ghcr.io/attachmentgenie/{{.ProjectName}}:{{ .Version }}-arm64v8"
   - name_template: "ghcr.io/attachmentgenie/{{.ProjectName}}:latest"
     image_templates:
       - "ghcr.io/attachmentgenie/{{.ProjectName}}:{{ .Version }}-amd64"
