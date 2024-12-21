@@ -9,7 +9,7 @@ import (
 	sink "github.com/attachmentgenie/nomad-events-sink/internal/sinks"
 	"github.com/attachmentgenie/nomad-events-sink/internal/sinks/provider"
 	"github.com/attachmentgenie/nomad-events-sink/pkg/stream"
-	lokiflag "github.com/grafana/loki/pkg/util/flagext"
+	lokiflag "github.com/grafana/loki/v3/pkg/util/flagext"
 	"github.com/knadh/koanf/parsers/toml"
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
